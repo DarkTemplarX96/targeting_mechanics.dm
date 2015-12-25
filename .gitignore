@@ -1,5 +1,47 @@
-*.dmb
-*.rsc
-*.int
-*.lk
-*.zip
+mob/var
+	is_targetable = 1
+	is_targeting = 0
+
+var/list
+	is_targeted = list()
+
+var/const
+	TARGET_LAYER = FLOAT_LAYER - 1
+
+mob/proc
+	Targeted_AddOverlays()
+		overlays += /obj/Targeted_Overlays/Target
+
+	Targeted_RemoveOverlays()
+		overlays -= /obj/Targeted_Overlays/Target
+
+mob/DblClick(location, control, params)
+	src.Targeted_AddOverlays()
+	is_targeted += src
+	usr.is_targeting = 1
+
+mob/verb
+	Add_Target()
+		set hidden = 1
+		for(var/mob/M in oview())
+			if(src.is_targeting == 1)
+				return
+			else
+				M.Targeted_AddOverlays()
+				src.is_targeting = 1
+				is_targeted += M
+
+	Remove_Target()
+		set hidden = 1
+		for(var/mob/M in oview())
+			if(src.is_targeting == 1 && M in is_targeted)
+				M.Targeted_RemoveOverlays()
+				src.is_targeting = 0
+				is_targeted -= M
+			else
+				return
+
+obj/Targeted_Overlays
+	Target
+		icon = '[art] target_animation.dmi'
+		layer = TARGET_LAYER
